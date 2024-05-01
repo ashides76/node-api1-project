@@ -19,7 +19,7 @@ server.get('/api/users', async (req, res) => {
         const users = await Users.find()
         res.status(200).json(users)
     } catch (err) {
-        res.status(500).json({message: `Error fetching users data: ${err.message}`})
+        res.status(500).json({message: "The users information could not be retrieved"})
     }
 })
 
@@ -30,13 +30,13 @@ server.get('/api/users/:id', async (req, res) => {
         const userById = await Users.findById(id)
         if (!userById) {
             res.status(404).json({
-                message: `Error feching user by id: ${id}`,
+                message: "The user with the specified ID does not exist",
             })
         } else {
             res.status(200).json(userById)
         }
     } catch (err) {
-        res.status(500).json({message: `Error fetching user by id: ${err.message}`})
+        res.status(500).json({message: "The users information could not be retrieved"})
     }
 })
 
@@ -44,19 +44,16 @@ server.get('/api/users/:id', async (req, res) => {
 server.post('/api/users', async (req, res) => {
     try {
         const { name, bio } = req.body
-        const addUser = await Users.insert({name, bio})
+        const newUser = await Users.insert({name, bio})
         if (!name || !bio) {
-            res.status(422).json({
-                message: 'You must include name and bio'
+            res.status(400).json({
+                message: 'Please provide name and bio for the user'
             })
         } else {
-            res.status(201).json({
-                message: `${addUser.name}, has been created successfully`,
-                data: addUser,
-            })
+            res.status(201).json(newUser)
         }
     } catch (err) {
-        res.status(500).json({message: `Error adding a new user: ${err.message}`})
+        res.status(500).json({message: "There was an error while saving the user to the database"})
     }
 })
 
@@ -66,24 +63,23 @@ server.post('/api/users', async (req, res) => {
         const {name, bio} = req.body
         const { id } = req.params
         const updatedUser = await Users.update(id, {name, bio})
-        if (!name, !bio) {
-            res.status(422).json({
-                message: `Must include name and bio`
+        if (!name || !bio) {
+            res.status(400).json({
+                message: "Please provide name and bio for the user"
             })
         } else {
             if (!updatedUser) {
                 res.status(404).json({
-                    message: `No user by given id, ${id}`
+                    message: "The user with the specified ID does not exist"
                 }) 
             } else {
-                res.status(200).json({
-                    message: `Updated ${name}, successfully!`,
-                    data: updatedUser
-                })
+                res.status(200).json(updatedUser)
             }
         }
     } catch (err) {
-        res.status(500).json({message: `Error updating a user: ${err.message}`})
+        res.status(500).json({
+            message: "The user information could not be modified"
+        })
     }
  })
 
@@ -94,16 +90,13 @@ server.delete('/api/users/:id', async (req, res) => {
         const removedUser = await Users.remove(id)
         if (!removedUser) {
             res.status(404).json({
-                message: `No user by given id, ${id}`
+                message: "The user with the specified ID does not exist"
             })
         } else {
-            res.status(200).json({
-                message: `${removedUser.name}, successfully removed`,
-                body: removedUser
-            })
+            res.status(200).json(removedUser)
         }
     } catch (err) {
-        res.status(500).json({message: `Error removing a user: ${err.message}`})
+        res.status(500).json({message: "The user could not be removed"})
     }
 })
 
